@@ -10,9 +10,7 @@
 # ****************       set the CC variable for your system:
 # Set compiler command
 # Edit config.h and edit next line if needed:
-export set CC="cc -DUNIXLIKE -DLONG64 -I/usr/lib -L/usr/local/cuda-9.2/lib64 $2 $3 $4 $5 $6 $7 $8 $9"
-export set LD_FLAGS="-lcudart -lcuda -lstdc++"
-export set NVCC="nvcc -DLONG64 --generate-code arch=compute_37,code=\"sm_37,compute_37\""
+export set CC="cc -DUNIXLIKE -DLONG64 -I/usr/lib $2 $3 $4 $5 $6 $7 $8 $9"
 # ****************
 if test ! -f mochimo.c
 then
@@ -75,7 +73,7 @@ echo Remove executable modules . . .
 rm bcon bup bval mochimo sortlt
 rm genblock wallet neogen txclean
 echo Remove object files . . .
-rm crypto/sha256.o crypto/wots/wots.o trigg/trigg.o trigg/cuda_trigg.o
+rm crypto/sha256.o crypto/wots/wots.o trigg/trigg.o
 echo Remove log files . . .
 rm *.log
 echo
@@ -94,10 +92,9 @@ cd wots
 $CC -c wots.c  $LD_FLAGS  2>>../ccerror.log
 cd ../../trigg
 $CC -c trigg.c $LD_FLAGS  2>>ccerror.log
-$NVCC -c cuda_trigg.cu $LD_FLAGS 2>>ccerror.log
 cd ..
 echo Building Mochimo server...
-$CC -o mochimo mochimo.c trigg/trigg.o crypto/wots/wots.o crypto/sha256.o trigg/cuda_trigg.o $LD_FLAGS 2>>ccerror.log
+$CC -o mochimo mochimo.c trigg/trigg.o crypto/wots/wots.o crypto/sha256.o $LD_FLAGS 2>>ccerror.log
 echo Building helper programs...
 $CC -o bval    bval.c    trigg/trigg.o crypto/wots/wots.o crypto/sha256.o $LD_FLAGS 2>>ccerror.log
 $CC -o bcon    bcon.c    crypto/sha256.o $LD_FLAGS 2>>ccerror.log

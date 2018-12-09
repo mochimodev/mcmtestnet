@@ -1,19 +1,14 @@
 /* miner.c  The Block Miner  -- Child Process
  *
  * Copyright (c) 2018 by Adequate Systems, LLC.  All Rights Reserved.
- * See LICENSE.PDF   **** NO WARRANTY ****
+ * See LICENSE.TXT   **** NO WARRANTY ****
  *
  * The Mochimo Project System Software
  *
  * Date: 13 January 2018
  *
- */
+*/
 
-#include <inttypes.h>
-
-extern int trigg_init_cuda(byte difficulty, byte *blockNumber);
-extern void trigg_free_cuda();
-extern char *trigg_generate_cuda(byte *mroot, unsigned long long *nHaiku);
 
 /* miner blockin blockout -- child process */
 int miner(char *blockin, char *blockout)
@@ -23,10 +18,10 @@ int miner(char *blockin, char *blockout)
    byte *ptr;
    SHA256_CTX bctx;  /* to resume entire block hash after bcon.c */
    char *haiku;
+   word32 hps;
    time_t htime;
-   unsigned long long hcount, hps;
+   unsigned long hcount;
    word32 temp[3];
-   int initGPU = 0;
 
    /* Keep a separate rand2() sequence for miner child */
    if(read_data(&temp, 12, "mseed.dat") == 12)
@@ -72,41 +67,24 @@ int miner(char *blockin, char *blockout)
        */
       trigg_solve(bt.mroot, bt.difficulty[0], bt.bnum);
 
-      /* Initialize CUDA specific memory allocations */
-      initGPU = trigg_init_cuda(bt.difficulty[0], bt.bnum);
-      if(initGPU<1 || initGPU>64) {
-         error("miner: unsupported number of GPUs detected -> %d",initGPU);
-         break;
-      }
-
       /* Traverse all TRIGG links to build the
        * solution chain with trigg_generate()...
        */
-
-      for(htime = time(NULL), hcount = 0; ; ) {
+      for(htime = time(NULL), hcount = 0; ; hcount++) {
          if(!Running) break;
-         haiku = trigg_generate_cuda(bt.mroot, &hcount); 
+         haiku = trigg_generate(bt.mroot, bt.difficulty[0]);
          if(haiku != NULL) break;
       }
-
-      /* Free CUDA specific memory allocations */
-      trigg_free_cuda();
-
       htime = time(NULL) - htime;
       if(htime == 0) htime = 1;
       hps = hcount / htime;
-      write_data(&hps, 8, "hps.dat");  /* unsigned long haiku per second */
+      write_data(&hps, 4, "hps.dat");  /* word32 haiku per second */
       if(!Running) break;
-
-      if (!trigg_check(bt.mroot, bt.difficulty[0], bt.bnum)) {
-         printf("ERROR - Block is not valid\n");
-         break;
-      }
 
       show("solved");
 
       /* solved block! */
-      sleep(2);  /* make sure that stime is not to early */
+      sleep(2);  /* make sure that stime is not too early */
       put32(bt.stime, time(NULL));  /* put solve time in trailer */
       /* hash-in nonce and solved time to hash 
        * context begun by bcon.

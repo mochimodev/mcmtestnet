@@ -1,14 +1,14 @@
 /*
- * trigg.c  Trigg's Algorithm
- *
- * Copyright (c) 2018 by Adequate Systems, LLC.  All Rights Reserved.
- * See LICENSE.PDF   **** NO WARRANTY ****
- *
- * Date: 13 October 2018
- * Revision: 8
- *
- *
- *
+## trigg.c  Trigg's Algorithm
+##
+## Copyright (c) 2018 by Adequate Systems, LLC.  All Rights Reserved.
+## See LICENSE.TXT   **** NO WARRANTY ****
+##
+## Date:     4 June 2018
+## Revision: 7
+##
+*/
+/*
          a raindrop
          on sunrise air--
          drowned
@@ -100,7 +100,7 @@ typedef struct {
 #include "tdict.c"
 
 static int Tdiff;
-byte Tchain[32+256+16+8];  /* the TRIGG chain */
+static byte Tchain[32+256+16+8];  /* the TRIGG chain */
 
 
 /* Case frames for the semantic grammar with
